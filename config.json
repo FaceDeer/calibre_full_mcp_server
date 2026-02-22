@@ -17,7 +17,7 @@
                     "pubdate",
                     "publisher",
                     "identifiers",
-					"formats"
+                    "formats"
                 ],
                 "write": [
                     "title",
@@ -37,13 +37,13 @@
             },
             "import": {
                 "allowed_paths": [
-                    "d:/Python projects/calibre_full_mcp/tests/test_files"
+                    "tests/test_files"
                 ],
                 "allow_delete_source": false
             },
             "export": {
                 "allowed_paths": [
-                    "d:/Python projects/calibre_full_mcp/tests/test_files"
+                    "tests/test_files"
                 ],
                 "allow_overwrite_destination": false
             }

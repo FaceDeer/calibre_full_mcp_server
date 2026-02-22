@@ -114,7 +114,7 @@ JSON
 }
 ```
 
-This should allow you to easily switch library configurations as needed for different agents by selecting which configuration to point CALIBREMCP_CONFIGPATH at.
+This should allow you to easily switch library configurations as needed for different agents by selecting which configuration to point `CALIBREMCP_CONFIGPATH` at.
 
 ---
 
