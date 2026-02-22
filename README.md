@@ -140,4 +140,4 @@ If your agent does not yet support the `@mcp.resources` standard, set `expose_re
 
 ## Architecture
 
-For a deep dive into how this server manages worker processes and interacts with the Calibre database, please refer to the [Architecture Documentation](./doc/architecture.md).
+For a deep dive into how this server manages worker processes and interacts with the Calibre database, please refer to the [Architecture Documentation](doc/Architecture.md).
