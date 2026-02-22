@@ -1,0 +1,56 @@
+{
+    "libraries": {
+        "default": {
+            "path": "tests/test_library",
+            "description": "Contains a few books for testing purposes.",
+            "default": true,
+            "permissions": {
+                "read": [
+                    "title",
+                    "authors",
+                    "languages",
+                    "tags",
+                    "series",
+                    "series_index",
+                    "comments",
+                    "rating",
+                    "pubdate",
+                    "publisher",
+                    "identifiers",
+					"formats"
+                ],
+                "write": [
+                    "title",
+                    "authors",
+                    "languages",
+                    "tags",
+                    "series",
+                    "series_index",
+                    "comments",
+                    "rating",
+                    "pubdate",
+                    "publisher",
+                    "identifiers"
+                ],
+                "delete": true,
+                "convert": true
+            },
+            "import": {
+                "allowed_paths": [
+                    "d:/Python projects/calibre_full_mcp/tests/test_files"
+                ],
+                "allow_delete_source": false
+            },
+            "export": {
+                "allowed_paths": [
+                    "d:/Python projects/calibre_full_mcp/tests/test_files"
+                ],
+                "allow_overwrite_destination": false
+            }
+        }
+    },
+    "port": 8000,
+    "enable_worker_logging": true,
+    "expose_resources_via_tools": true,
+    "log_level": "debug"
+}

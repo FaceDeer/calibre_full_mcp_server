@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "calibre": {
+      "command": "python",
+      "args": [
+        "<full path>/calibre_full_mcp/src/server.py"
+      ],
+      "env": {
+        "PYTHONPATH": "<full path>/calibre_full_mcp/src",
+		"CALIBREMCP_CONFIGPATH": "<full path>/calibre_full_mcp/config.json"
+      }
+    }
+  }
+}
