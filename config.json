@@ -47,6 +47,7 @@
                 ],
                 "allow_overwrite_destination": false
             }
+            "worker_timeout": 300
         }
     },
     "port": 8000,

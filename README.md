@@ -22,7 +22,7 @@ This MCP server bridges the gap between AI agents and your [**Calibre** ebook li
 
 - **Calibre:** Must be installed on the host system. This server utilizes `calibre-debug` to execute worker processes.
 
-- **Concurrency Note:** Calibre does not support concurrent access to a single library. **Do not** point an agent to a library currently being used by the Calibre desktop application or other processes to avoid database corruption.
+- **Concurrency Note:** Calibre does not support concurrent access to a single library. **Do not** point an agent to a library currently being used by the Calibre desktop application or other calibre processes to avoid database corruption. Setting a `worker_timeout` can reduce the risk of this happening accidentally, but don't rely on that to protect your libraries. Be aware of what you're doing.
 
 ---
 
@@ -54,7 +54,8 @@ JSON
             "export": {
                 "allowed_paths": ["d:/ebook_exports"s],
                 "allow_overwrite_destination": false
-            }
+            },
+            "worker_timeout": 300
         }
     },
     "port": 8000,
@@ -81,15 +82,17 @@ Each library is identified by a unique text key and can have its own separate co
 | `import.allow_delete_source`         | If `true`, the server can delete the original file after a successful import.                                                                                                                                                      |
 | `export.allowed_paths`               | A whitelist of directories the agent can export book files to.                                                                                                                                                                     |
 | `export.allow_overwrite_destination` | If `true`, the server can overwrite files in the allowed export paths when it exports files there.                                                                                                                                 |
+| `worker_timeout`                     | An integer in seconds. This specific library's `calibre-debug` worker process will be ended if this much time passes without activity. If omitted, defaults to the root configuration for `worker_timeout`.                        |
 
 There are also several top-level configuration settings that apply to the MCP server as a whole:
 
-| Key                          | Description                                                                                                                                                                                                                                                                                                                                                                                                              |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `port`                       | The port the server is exposed on.                                                                                                                                                                                                                                                                                                                                                                                       |
-| `enable_worker_logging`      | Each Calibre library has its own `calibre-debug` process that  runs code to intereact with the internal Calibre API. When `true` these processes will write logs to the `logs` folder for debugging purposes.                                                                                                                                                                                                            |
-| `log_level`                  | Sets what minimum level of logging message will be recorded in `logs/app.log`. Set to "error", "warning", "info", "debug" or "none".                                                                                                                                                                                                                                                                                     |
-| `expose_resources_via_tools` | Some older MCP clients don't understand the "resources" type that this server exposes, for example to allow the agent to read the contents of the `/skills` folder. When this setting is `true` those resources will be exposed via `list_help_topics` and `get_help_topic` instead. The `libraries` resource listing the available libraries and their permissions will also be converted into a `list_libraries` tool. |
+| Key                          | Description                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `port`                       | The port the server is exposed on.                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `enable_worker_logging`      | Each Calibre library has its own `calibre-debug` process that  runs code to intereact with the internal Calibre API. When `true` these processes will write logs to the `logs` folder for debugging purposes.                                                                                                                                                                                                                                 |
+| `worker_timeout`             | For efficiency, the `calibre-debug` worker process for each library is kept alive between requests. Calibre doesn't handle multiple processes accessing the same library at once, so to reduce the risk of this happening you can set a timeout (in seconds) for inactive worker processes to expire. If this is not set then processes are kept alive as long as the server is up (unless overridden by a specific library's configuration). |
+| `log_level`                  | Sets what minimum level of logging message will be recorded in `logs/app.log`. Set to "error", "warning", "info", "debug" or "none".                                                                                                                                                                                                                                                                                                          |
+| `expose_resources_via_tools` | Some older MCP clients don't understand the "resources" type that this server exposes, for example to allow the agent to read the contents of the `/skills` folder. When this setting is `true` those resources will be exposed via `list_help_topics` and `get_help_topic` instead. The `libraries` resource listing the available libraries and their permissions will also be converted into a `list_libraries` tool.                      |
 
 ### Example MCP Configuration
 
