@@ -12,8 +12,12 @@ class WorkerPool:
         self.base_dir = base_dir
         self.workers = {} # {library_name: process}
         self.worker_stderr_files = {} # {library_name: (file_handle, file_path)}
+        self.worker_stats = {} # {library_name: {'last_used': time.time(), 'active_requests': 0}}
         self.lock = threading.Lock()
         self.request_id_counter = 1
+        self._shutdown_event = threading.Event()
+        self._cleanup_thread = threading.Thread(target=self._cleanup_workers, daemon=True)
+        self._cleanup_thread.start()
 
     def get_worker(self, library_name):
         """
@@ -91,10 +95,16 @@ class WorkerPool:
                         encoding='utf-8'
                     )
                     self.workers[resolved_name] = proc
+                    self.worker_stats[resolved_name] = {'last_used': time.time(), 'active_requests': 0}
                 except FileNotFoundError:
                     logging.error("get_worker returning error 'calibre-debug not found in PATH.'")
                     raise RuntimeError("calibre-debug executable not found.")
             
+            # Increment tracking logic:
+            if resolved_name in self.worker_stats:
+                self.worker_stats[resolved_name]['active_requests'] += 1
+                self.worker_stats[resolved_name]['last_used'] = time.time()
+                
             logging.debug(f"get_worker returning result '{resolved_name}'")
             return proc, resolved_name
 
@@ -212,11 +222,57 @@ class WorkerPool:
             with self.lock:
                 if resolved_name in self.workers:
                     del self.workers[resolved_name]
+                if resolved_name in self.worker_stats:
+                    del self.worker_stats[resolved_name]
             logging.error(f"Communication with Calibre worker for '{library_name}' failed.")
             raise RuntimeError(f"Communication with Calibre worker for '{library_name}' failed.")
+        finally:
+            with self.lock:
+                if resolved_name in self.worker_stats:
+                    self.worker_stats[resolved_name]['active_requests'] -= 1
+                    self.worker_stats[resolved_name]['last_used'] = time.time()
+
+    def _cleanup_workers(self):
+        """Background thread that monitors and shuts down idle workers."""
+        while not self._shutdown_event.wait(5.0): # Run check every 5 seconds
+            with self.lock:
+                for lib_name in list(self.workers.keys()):
+                    proc = self.workers[lib_name]
+                    stats = self.worker_stats.get(lib_name)
+                    if not stats:
+                        continue
+                        
+                    active = stats['active_requests']
+                    last_used = stats['last_used']
+                    
+                    if active > 0:
+                        continue
+                        
+                    # Determine timeout threshold
+                    lib_conf = self.config_manager.get_library_config(lib_name)
+                    if lib_conf:
+                        timeout = lib_conf.get("worker_timeout")
+                        if timeout is None:
+                            timeout = self.config_manager.get_global_setting("worker_timeout")
+                    else:
+                        timeout = self.config_manager.get_global_setting("worker_timeout")
+                        
+                    # Default: never expire if timeout is missing, 0, or null
+                    if not timeout or timeout <= 0:
+                        continue
+                        
+                    time_idle = time.time() - last_used
+                    if time_idle > timeout:
+                        logging.debug(f"Worker for '{lib_name}' has been idle for {time_idle:.1f}s (timeout: {timeout}s), shutting it down.")
+                        if proc.poll() is None:
+                            proc.terminate()
+                        del self.workers[lib_name]
+                        del self.worker_stats[lib_name]
+                        # Assume shutdown cleanup routine will handle stderr log cleanup when worker restarts or completely shuts down.
 
     def shutdown(self):
         """Terminates all worker processes and cleans up stderr files."""
+        self._shutdown_event.set()
         with self.lock:
             for lib_name, proc in self.workers.items():
                 if proc.poll() is None:
@@ -247,3 +303,4 @@ class WorkerPool:
             
             self.workers.clear()
             self.worker_stderr_files.clear()
+            self.worker_stats.clear()
