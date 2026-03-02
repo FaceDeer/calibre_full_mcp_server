@@ -148,6 +148,21 @@ If your agent does not yet support the `@mcp.resources` standard, set `expose_re
 
 ---
 
+## Docker Support
+
+If you are building a Docker image for this server, it is recommended to pre-download the necessary NLTK models during the build phase to avoid runtime downloads and slow startup.
+
+You can use the provided setup script for this purpose:
+
+```bash
+# Inside your Dockerfile
+RUN calibre-full-mcp-setup
+```
+
+This will download the `punkt` and `punkt_tab` models into the image.
+
+---
+
 ## Architecture
 
 For a deep dive into how this server manages worker processes and interacts with the Calibre database, please refer to the [Architecture Documentation](doc/Architecture.md).

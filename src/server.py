@@ -339,7 +339,7 @@ for tool_def in TOOL_DEFINITIONS:
 
 # --- Resources ---
 
-skills_dir = os.path.join(base_dir, "..", "skills")
+skills_dir = os.path.join(base_dir, "skills")
 
 @mcp.resource("calibre://libraries")
 def get_libraries() -> list:
