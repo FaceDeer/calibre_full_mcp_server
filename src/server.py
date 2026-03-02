@@ -387,5 +387,9 @@ if expose_via_tools:
         return logic._get_help_topic_impl(topic, skills_dir)
 
 
-if __name__ == "__main__":
+def main():
+    """Main entry point for the MCP server."""
     mcp.run()
+
+if __name__ == "__main__":
+    main()

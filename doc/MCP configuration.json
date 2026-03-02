@@ -1,13 +1,14 @@
 {
   "mcpServers": {
     "calibre": {
-      "command": "python",
+      "command": "uvx",
       "args": [
-        "<full path>/calibre_full_mcp/src/server.py"
+        "--from",
+        "github.com/FaceDeer/calibre_full_mcp_server",
+        "calibre-full-mcp"
       ],
       "env": {
-        "PYTHONPATH": "<full path>/calibre_full_mcp/src",
-		"CALIBREMCP_CONFIGPATH": "<full path>/calibre_full_mcp/config.json"
+        "CALIBREMCP_CONFIGPATH": "<full path to your config.json>"
       }
     }
   }
