@@ -96,26 +96,33 @@ There are also several top-level configuration settings that apply to the MCP se
 
 ### Example MCP Configuration
 
-Point to the above configuration file with the `CALIBREMCP_CONFIGPATH` environment variable in your MCP configuration. For example:
+You can run this MCP server using `uvx`, which will seamlessly download and run the latest version from GitHub without needing a manual installation.
+
+First, [install uv](https://docs.astral.sh/uv/getting-started/installation/) if you haven't already.
+
+Then, point to your configuration file with the `CALIBREMCP_CONFIGPATH` environment variable in your MCP clients configuration. For example:
 
 JSON
 
-```
+```json
 {
     "mcpServers": {
         "calibre": {
-            "command": "python",
+            "command": "uvx",
             "args": [
-                "<full path>/calibre_full_mcp/src/server.py"
+                "--from",
+                "github.com/FaceDeer/calibre_full_mcp_server",
+                "calibre-full-mcp"
             ],
-        "env": {
-            "PYTHONPATH": "<full path>/calibre_full_mcp/src",
-            "CALIBREMCP_CONFIGPATH": "<full path>/calibre_full_mcp/config.json"
+            "env": {
+                "CALIBREMCP_CONFIGPATH": "<full path to your config.json>"
             }
         }
     }
 }
 ```
+
+*(Note: If you have cloned the repository locally and wish to run from your local copy, you can replace `"github.com/FaceDeer/calibre_full_mcp_server"` with the `<full path to your local repository directory>`.)*
 
 This should allow you to easily switch library configurations as needed for different agents by selecting which configuration to point `CALIBREMCP_CONFIGPATH` at.
 
@@ -138,6 +145,21 @@ Calibre libraries often contain internal metadata that can clutter an agent's co
 ### 3. Resource Exposure
 
 If your agent does not yet support the `@mcp.resources` standard, set `expose_resources_via_tools` to `true`. This will expose dedicated tools that allow the agent to fetch files via standard tool calls.
+
+---
+
+## Docker Support
+
+If you are building a Docker image for this server, it is recommended to pre-download the necessary NLTK models during the build phase to avoid runtime downloads and slow startup.
+
+You can use the provided setup script for this purpose:
+
+```bash
+# Inside your Dockerfile
+RUN calibre-full-mcp-setup
+```
+
+This will download the `punkt` and `punkt_tab` models into the image.
 
 ---
 
